@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#define PIC_PATH "/home/isomeister/cap1.jpg"
+#define PIC_PATH "/home/isomeister/cap2.jpg"
 
 using namespace std;
 using namespace cv;
@@ -14,6 +14,8 @@ using namespace cv;
 VideoCapture cap(0);
 
 vector<Point> biggerContour;
+vector<double> barCodeXPos;
+
 
 int  t1 = 204, t2 = 255, t3 = 0;
 
@@ -38,7 +40,7 @@ void getCountours(Mat img, Mat source) {
     findContours(img, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
     //drawContours(source, contours, -1, Scalar(255, 0, 255), 2);
 
-    int biggerArea = 150;
+    int biggerArea = 0;
 
     for (int i = 0; i < contours.size(); i++) {
 
@@ -50,16 +52,18 @@ void getCountours(Mat img, Mat source) {
             if (boundingRect(contours[i]).y < 10) {
                 continue;
             }
+            continue;
         }
 
         int area = contourArea(contours[i]);
-                if (area > biggerArea) {
-                    biggerContour = contours[i];
-                    cout << "\nX " << boundingRect(biggerContour).x << "Y " << boundingRect(biggerContour).y << "W ", boundingRect(biggerContour).width, "H ", boundingRect(biggerContour).height;
-                    cout << "| Area: " << boundingRect(biggerContour).area() << "\n";
-                    continue;
-                }
-
+        barCodeXPos.push_back(boundingRect(contours[i]).x);
+        if (area > biggerArea) {
+            biggerArea = area;
+            biggerContour = contours[i];
+            cout << "\nX " << boundingRect(biggerContour).x << " Y  " << boundingRect(biggerContour).y << " W ", boundingRect(biggerContour).width, " H ", boundingRect(biggerContour).height;
+            cout << "| Area: " << boundingRect(biggerContour).area() << "\n";
+            continue;
+        }
         /*
         circle(res, Point(20, 17), 10, Scalar(173, 24, 11), FILLED);
         circle(res, Point(81, 31), 10, Scalar(250, 228, 85), FILLED);
@@ -67,6 +71,30 @@ void getCountours(Mat img, Mat source) {
         */
 
     }
+}
+
+int getPos() {
+sort(barCodeXPos.begin(), barCodeXPos.end());
+    for (int j = 0; j < barCodeXPos.size(); j++) {
+
+        cout << " Barcodex Pos: " << barCodeXPos[j] << "\n";
+        if (boundingRect(biggerContour).x == barCodeXPos[j]) {
+            cout << "Game element in the: ";
+            if (j == 0) {
+                cout << "left \n";
+                return 0;
+            } else if (j == 1) {
+                cout << "right \n";
+                return 1;
+            } else if (j == 2) {
+                cout << "center \n";
+                return 2;
+            } else {
+                return -1;
+            }
+        }
+    }
+    return 0;
 }
 
 /**
@@ -89,9 +117,9 @@ void recognize(Mat path, bool redSide) {
     cout << "AREA BIG CONTOUR: " << boundingRect(biggerContour).area() << "\n";
 
 
-    circle(res, Point(boundingRect(biggerContour).x, boundingRect(biggerContour).y), 10, Scalar(250, 228, 85), FILLED);
+    circle(res, Point(boundingRect(biggerContour).x, boundingRect(biggerContour).y), 10, Scalar(255, 0, 255), FILLED);
     //drawContours(res, biggerContour, -1, Scalar(255, 0, 255), 2);
-    
+    getPos();
 
     imshow("resized", res);
     imshow("marked", gray);
