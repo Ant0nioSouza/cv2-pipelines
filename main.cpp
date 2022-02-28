@@ -3,14 +3,18 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <string>
+#include <vector>
 
-#define PIC_PATH "/home/isomeister/pic1.png"
+#define PIC_PATH "/home/isomeister/cap1.jpg"
 
 using namespace std;
 using namespace cv;
 
 
 VideoCapture cap(0);
+
+int  t1 = 204, t2 = 255, t3 = 0;
+
 
 /**
  * @brief save the gived frame in a file.
@@ -21,31 +25,39 @@ VideoCapture cap(0);
 void takePicture(Mat video, Size resolution) {
     Mat dst;
     resize(video, dst, resolution);
-    imwrite(PIC_PATH, dst);
+    //imwrite(PIC_PATH, dst);
 }
 
-void recognize(string path, bool redSide) {
+/**
+ * @brief 
+ * 
+ * @param path 
+ * @param redSide 
+ */
+void recognize(Mat path, bool redSide) {
     Mat res, gray, tresh;
     
-    resize(imread(path), res, Size(200, 200));
+    resize(path, res, Size(200, 200));
     cvtColor(res, gray, COLOR_BGR2GRAY);
-    threshold(gray, gray, 80, 255, 0);
+
 
     imshow("resized", res);
     imshow("marked", gray);
-    //imshow("treshold", tresh);
-    waitKey(0);
+    threshold(gray, gray, t1, t2, t3);
+
+
 }
 
 int main(int, char **) {
 
     Mat source;
+    
     cap.read(source);
     
-    cout << "Capturing image...";
-    takePicture(source, Size(150, 200));
+    //cout << "Capturing image...";
+    //takePicture(source, Size(150, 200));
     cout << "Recognizing image...";
-    recognize("/home/isomeister/Pictures/Screenshot from 2022-02-27 19-24-12.png", false);
+    recognize(imread(PIC_PATH), false);
 
     return 0;
 }
